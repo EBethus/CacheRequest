@@ -79,4 +79,9 @@ class CacheRequest
     {
         return $this->request('post', $path, $param, $cb);
     }
+
+    public function get($path, $param = [], callable $cb = null)
+    {
+        return $this->request('get', $path, $param, $cb);
+    }
 }
