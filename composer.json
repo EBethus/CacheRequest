@@ -1,0 +1,27 @@
+{
+    "name": "ebethus/cacherequest",
+    "description": "Cache for request",
+    "type": "library",
+    "require": {
+        "tymon/jwt-auth": "^1.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "EBethus\\CacheRequest\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ashrey",
+            "email": "alberroteran@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EBethus\\CacheRequest\\CacheRequestProvider"
+            ]
+        }
+    }
+}
