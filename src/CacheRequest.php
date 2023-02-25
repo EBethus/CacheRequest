@@ -75,13 +75,13 @@ class CacheRequest
         return $data;
     }
 
-    public function post($path, $param = [], callable $cb = null)
+    public function post($path, $param = [], callable $cb = null, $key = null)
     {
-        return $this->request('post', $path, $param, $cb);
+        return $this->request('post', $path, $param, $cb, $key);
     }
 
-    public function get($path, $param = [], callable $cb = null)
+    public function get($path, $param = [], callable $cb = null, $key = null)
     {
-        return $this->request('get', $path, $param, $cb);
+        return $this->request('get', $path, $param, $cb, $key);
     }
 }
