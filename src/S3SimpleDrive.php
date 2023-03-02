@@ -1,6 +1,7 @@
 <?php
-use Imannms\LaravelS3CacheDriver\S3Store;
+namespace EBethus\CacheRequest;
 
+use Imannms\LaravelS3CacheDriver\S3Store;
 
 class S3SimpleDrive extends S3Store
 {
