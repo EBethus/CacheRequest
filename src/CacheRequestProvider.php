@@ -30,5 +30,8 @@ class CacheRequestProvider extends ServiceProvider
 
     public function boot()
     {
+        Cache::extend('s3simple', function($app, $config){
+            return Cache::repository(new S3SimpleDrive($app, $config));
+        });
     }
 }
