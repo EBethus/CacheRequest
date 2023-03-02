@@ -13,7 +13,8 @@ class CacheRequestProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(CacheRequest::class, function ($app) {
-            return new CacheRequest();
+            $cachename = config('services.cacherequest.drive') ?? config('cache.default');
+            return new CacheRequest($cachename);
         });
     }
 

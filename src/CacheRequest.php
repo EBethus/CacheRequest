@@ -14,6 +14,13 @@ class CacheRequest
 
     protected $status = Response::HTTP_OK;
 
+    protected $driver;
+
+    public function __construct($driver)
+    {
+        $this->driver = $driver;
+    }
+
     protected function request($method, $path, $param = [], callable $cb = null, $key = null)
     {
         $url = trim($this->url, '/');
@@ -25,7 +32,7 @@ class CacheRequest
 
         $absURL = "{$url}/$path";
         $key = $key ?? md5($absURL . json_encode($param). $method);
-        $data = \Cache::remember($key, $this->cachetime, function () use ($absURL, $param, $cb, $method, $key) {
+        $data = \Cache::store($this->driver)->remember($key, $this->cachetime, function () use ($absURL, $param, $cb, $method, $key) {
             try {
                 $request = Http::withHeaders([
                     'Accept' => 'application/json',
