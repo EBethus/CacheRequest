@@ -2,6 +2,7 @@
 namespace EBethus\CacheRequest;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Cache;
 
 class CacheRequestProvider extends ServiceProvider
 {
