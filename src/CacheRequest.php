@@ -27,7 +27,7 @@ class CacheRequest
         $path = trim($path, '/');
 
         if (empty($url)) {
-            throw new \RunException('URL is empty, set one!');
+            throw new \RuntimeException('URL is empty, set one!');
         }
 
         $absURL = "{$url}/$path";
