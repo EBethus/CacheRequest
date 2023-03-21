@@ -64,12 +64,19 @@ class CacheRequest
             $this->status = $status;
             if ($status != Response::HTTP_OK) {
                 $error = $response->json();
-                return [
+                $info =  [
                     'status' => $response->status(),
-                    'timestamp'=>Carbon::now()->format('d-m-Y H:i:s'),
+                    'timestamp'=> Carbon::now()->format('d-m-Y H:i:s'),
                     'resultado' => $status == 404 ? 'No Encontrado': 'ERROR_DATOS',
                     'description' => $error,
                 ];
+
+                if (config('app.debug')) {
+                    $info['url'] = $absURL;
+                    $info['param'] = $param;
+                }
+
+                return $info;
             } else {
                 return $response->json();
             }
