@@ -74,6 +74,7 @@ class CacheRequest
                 if (config('app.debug')) {
                     $info['url'] = $absURL;
                     $info['param'] = $param;
+                    $info['key'] = $key;
                 }
 
                 return $info;
