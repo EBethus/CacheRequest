@@ -84,7 +84,7 @@ class CacheRequest
         });
         
         if ($this->status != Response::HTTP_OK) {
-            \Cache::forget($key);
+            \Cache::store($this->driver)->forget($key);
         }
 
         return $data;
