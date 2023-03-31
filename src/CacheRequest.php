@@ -61,9 +61,19 @@ class CacheRequest
 
             $status = $response->status();
 
+            \Log::info('CacheRequest', [
+                'url' => $absURL,
+                'param' => $param,
+                'key' => $key,
+                'status' => $status,
+            ]);
+
             $this->status = $status;
+            
+            $contentType = $response->header('Content-Type');
+            $isJSON = strpos($contentType, 'json') !== false; 
             if ($status != Response::HTTP_OK) {
-                $error = $response->json();
+                $error = $isJSON ? $response->json() : $response->body();
                 $info =  [
                     'status' => $response->status(),
                     'timestamp'=> Carbon::now()->format('d-m-Y H:i:s'),
@@ -79,14 +89,13 @@ class CacheRequest
 
                 return $info;
             } else {
-                return $response->json();
+                return $isJSON ? $response->json() : $response->body();
             }
         });
         
         if ($this->status != Response::HTTP_OK) {
             \Cache::store($this->driver)->forget($key);
         }
-
         return $data;
     }
 
