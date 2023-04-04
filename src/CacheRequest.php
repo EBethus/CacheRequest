@@ -12,6 +12,9 @@ class CacheRequest
     // media hora de cache
     public $cachetime = 1800;
 
+    // mostrar info para debug
+    public $debug = false;
+
     protected $status = Response::HTTP_OK;
 
     protected $driver;
@@ -61,13 +64,6 @@ class CacheRequest
 
             $status = $response->status();
 
-            \Log::info('CacheRequest', [
-                'url' => $absURL,
-                'param' => $param,
-                'key' => $key,
-                'status' => $status,
-            ]);
-
             $this->status = $status;
             
             $contentType = $response->header('Content-Type');
@@ -81,7 +77,7 @@ class CacheRequest
                     'description' => $error,
                 ];
 
-                if (config('app.debug')) {
+                if ($this->debug) {
                     $info['url'] = $absURL;
                     $info['param'] = $param;
                     $info['key'] = $key;
