@@ -33,7 +33,7 @@ class CacheRequest
             throw new \RuntimeException('URL is empty, set one!');
         }
 
-        $absURL = "{$url}/$path";
+        $absURL = rtrim("{$url}/$path", '/');
         $key = $key ?? md5($absURL . json_encode($param). $method);
         $data = \Cache::store($this->driver)->remember($key, $this->cachetime, function () use ($absURL, $param, $cb, $method, $key) {
             try {
