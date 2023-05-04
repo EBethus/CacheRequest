@@ -3,7 +3,6 @@
     "description": "Cache for request",
     "type": "library",
     "require": {
-        "tymon/jwt-auth": "^2.0",
         "imannms/laravel-s3-cache-driver": "^1.0"
     },
     "license": "MIT",
