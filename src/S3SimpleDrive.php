@@ -14,7 +14,7 @@ class S3SimpleDrive extends S3Store
      */
     protected function path($key)
     {
-        $parts = \Str::slug($key);
+        $parts = $key;
         return "{$this->directory}/$parts";
     }
 }
