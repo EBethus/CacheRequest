@@ -6,6 +6,13 @@ use Imannms\LaravelS3CacheDriver\S3Store;
 class S3SimpleDrive extends S3Store
 {
 
+        /**
+     * The root directory.
+     *
+     * @var string
+     */
+    protected $directory = 'cache';
+
     /**
      * Get the full path for the given cache key.
      *
