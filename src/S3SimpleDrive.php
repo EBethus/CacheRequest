@@ -11,7 +11,7 @@ class S3SimpleDrive extends S3Store
      *
      * @var string
      */
-    protected $directory = 'cache';
+    protected $directory = '';
 
     /**
      * Get the full path for the given cache key.
