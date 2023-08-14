@@ -104,4 +104,19 @@ class CacheRequest
     {
         return $this->request('get', $path, $param, $cb, $key);
     }
+
+    public function put($path, $param = [], callable $cb = null, $key = null)
+    {
+        return $this->request('put', $path, $param, $cb, $key);
+    }
+
+    public function delete($path, $param = [], callable $cb = null, $key = null)
+    {
+        return $this->request('delete', $path, $param, $cb, $key);
+    }
+
+    public function patch($path, $param = [], callable $cb = null, $key = null)
+    {
+        return $this->request('patch', $path, $param, $cb, $key);
+    }
 }
