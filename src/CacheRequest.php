@@ -2,7 +2,10 @@
 namespace EBethus\CacheRequest;
 
 use Carbon\Carbon;
+
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+
 use Symfony\Component\HttpFoundation\Response;
 
 class CacheRequest
@@ -39,6 +42,11 @@ class CacheRequest
 
         $absURL = rtrim("{$url}/$path", '/');
         $key = $key ?? md5($absURL . json_encode($param). $method);
+        $data = Cache::store($this->driver)->get($key);
+        if ($data) {
+            return $data;
+        }
+
         $request = Http::withHeaders([
             'Accept' => 'application/json',
             'Cache-Control' => 'no-cache',
@@ -49,34 +57,18 @@ class CacheRequest
             $cb($request);
         }
 
-
-        if ($method == 'get') {
-            $request = \Cache::store($this->driver)->remember($key, $this->cachetime, function () use ($absURL, $param) {
-                try {
-                    return $request->get($absURL, $param);
-                }  catch (\Exception $exception) {
-                    $error = !\App::environment('production') ? $exception->getMessage() : 'Error de sistema';
-                    throw new \Exception($error);
-                }
-            });
-        } else {
-            try {
-                $response = $request->$method($absURL, $param);
-            } catch (\Exception $exception) {
-                $error = !\App::environment('production') ? $exception->getMessage() : 'Error de sistema';
-                throw new \Exception($error);
-            }
-        }
-
-        if ($mehtod == 'get' && $this->status != Response::HTTP_OK && $this->status != Response::HTTP_NOT_FOUND) {
-            \Cache::store($this->driver)->forget($key);
+        try {
+            $response = $request->$method($absURL, $param);
+        } catch (\Exception $exception) {
+            $error = !\App::environment('production') ? $exception->getMessage() : 'Error de sistema';
+            throw new \Exception($error);
         }
 
         $this->status = $response->status();
         $contentType = $response->header('Content-Type');
         $isJSON = strpos($contentType, 'json') !== false; 
 
-        if ($status != Response::HTTP_OK) {
+        if ($this->status != Response::HTTP_OK) {
             $error = $isJSON ? $response->json() : $response->body();
             $info =  [
                 'status' => $response->status(),
@@ -94,7 +86,13 @@ class CacheRequest
             return $info;
         }
 
-        return $isJSON ? $response->json() : $response->body();
+        $data = $isJSON ? $response->json() : $response->body();
+
+        if ($method == 'get' && in_array($this->status, [Response::HTTP_OK, Response::HTTP_NOT_FOUND])) {
+            \Cache::store($this->driver)->put($key, $data);
+        }
+
+        return $data;
     }
 
     public function post($path, $param = [], callable $cb = null, $key = null)
