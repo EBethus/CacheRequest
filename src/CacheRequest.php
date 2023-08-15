@@ -33,66 +33,68 @@ class CacheRequest
             throw new \RuntimeException('URL is empty, set one!');
         }
 
+        if (!in_array($method, ['get', 'post', 'put', 'delete', 'patch'])) {
+            throw new \RuntimeException("Error debe seleccionar el método");
+        }
+
         $absURL = rtrim("{$url}/$path", '/');
         $key = $key ?? md5($absURL . json_encode($param). $method);
-        $data = \Cache::store($this->driver)->remember($key, $this->cachetime, function () use ($absURL, $param, $cb, $method, $key) {
-            try {
-                $request = Http::withHeaders([
-                    'Accept' => 'application/json',
-                    'Cache-Control' => 'no-cache',
-                    'User-Agent' => 'Mozilla/5.0'
-                ]);
-                if ($cb) {
-                    $cb($request);
-                }
+        $request = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Cache-Control' => 'no-cache',
+            'User-Agent' => 'Mozilla/5.0'
+        ]);
 
-                switch ($method) {
-                    case 'get':
-                        $response = $request->get($absURL, $param);
-                        break;
-                    case 'post':
-                        $response = $request->post($absURL, $param);
-                        break;
-                    default:
-                        throw new \Exception("Error debe seleccionar un metodo");
-                        break;
+        if (is_callable($cb)) {
+            $cb($request);
+        }
+
+
+        if ($method == 'get') {
+            $request = \Cache::store($this->driver)->remember($key, $this->cachetime, function () use ($absURL, $param) {
+                try {
+                    return $request->get($absURL, $param);
+                }  catch (\Exception $exception) {
+                    $error = !\App::environment('production') ? $exception->getMessage() : 'Error de sistema';
+                    throw new \Exception($error);
                 }
+            });
+        } else {
+            try {
+                $response = $request->$method($absURL, $param);
             } catch (\Exception $exception) {
                 $error = !\App::environment('production') ? $exception->getMessage() : 'Error de sistema';
                 throw new \Exception($error);
             }
+        }
 
-            $status = $response->status();
-
-            $this->status = $status;
-            
-            $contentType = $response->header('Content-Type');
-            $isJSON = strpos($contentType, 'json') !== false; 
-            if ($status != Response::HTTP_OK) {
-                $error = $isJSON ? $response->json() : $response->body();
-                $info =  [
-                    'status' => $response->status(),
-                    'timestamp'=> Carbon::now()->format('d-m-Y H:i:s'),
-                    'resultado' => $status == 404 ? 'No Encontrado': 'ERROR_DATOS',
-                    'description' => $error,
-                ];
-
-                if ($this->debug) {
-                    $info['url'] = $absURL;
-                    $info['param'] = $param;
-                    $info['key'] = $key;
-                }
-
-                return $info;
-            } else {
-                return $isJSON ? $response->json() : $response->body();
-            }
-        });
-        
-        if ($this->status != Response::HTTP_OK) {
+        if ($mehtod == 'get' && $this->status != Response::HTTP_OK && $this->status != Response::HTTP_NOT_FOUND) {
             \Cache::store($this->driver)->forget($key);
         }
-        return $data;
+
+        $this->status = $response->status();
+        $contentType = $response->header('Content-Type');
+        $isJSON = strpos($contentType, 'json') !== false; 
+
+        if ($status != Response::HTTP_OK) {
+            $error = $isJSON ? $response->json() : $response->body();
+            $info =  [
+                'status' => $response->status(),
+                'timestamp'=> Carbon::now()->format('d-m-Y H:i:s'),
+                'resultado' => $status == 404 ? 'No Encontrado': 'ERROR_DATOS',
+                'description' => $error,
+            ];
+
+            if ($this->debug) {
+                $info['url'] = $absURL;
+                $info['param'] = $param;
+                $info['key'] = $key;
+            }
+
+            return $info;
+        }
+
+        return $isJSON ? $response->json() : $response->body();
     }
 
     public function post($path, $param = [], callable $cb = null, $key = null)
