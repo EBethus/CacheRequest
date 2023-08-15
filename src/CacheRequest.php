@@ -73,7 +73,7 @@ class CacheRequest
             $info =  [
                 'status' => $response->status(),
                 'timestamp'=> Carbon::now()->format('d-m-Y H:i:s'),
-                'resultado' => $status == 404 ? 'No Encontrado': 'ERROR_DATOS',
+                'resultado' => $this->status == 404 ? 'No Encontrado': 'ERROR_DATOS',
                 'description' => $error,
             ];
 
