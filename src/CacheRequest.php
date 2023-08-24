@@ -68,7 +68,7 @@ class CacheRequest
         $contentType = $response->header('Content-Type');
         $isJSON = strpos($contentType, 'json') !== false; 
 
-        if ($this->status != Response::HTTP_OK) {
+        if (!in_array($this->status, [Response::HTTP_OK, Response::HTTP_CREATED, Response::HTTP_ACCEPTED])) {
             $error = $isJSON ? $response->json() : $response->body();
             $info =  [
                 'status' => $response->status(),
