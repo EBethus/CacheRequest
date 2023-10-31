@@ -41,7 +41,11 @@ class CacheRequest
         }
 
         $absURL = rtrim("{$url}/$path", '/');
-        $key = $key ?? md5($absURL . json_encode($param). $method);
+
+        if (is_null($key)) {
+            $key = md5($absURL . json_encode($param). $method);
+        }
+
         $data = Cache::store($this->driver)->get($key);
         if ($data) {
             return $data;
@@ -88,7 +92,7 @@ class CacheRequest
 
         $data = $isJSON ? $response->json() : $response->body();
 
-        if ($method == 'get' && in_array($this->status, [Response::HTTP_OK, Response::HTTP_NOT_FOUND])) {
+        if ($method == 'get' && in_array($this->status, [Response::HTTP_OK, Response::HTTP_NOT_FOUND]) && $key !== false) {
             \Cache::store($this->driver)->put($key, $data);
         }
 
